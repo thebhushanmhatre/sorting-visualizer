@@ -14,3 +14,30 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.chart {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.navbar-items {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.navbar h2 {
+  text-align: center;
+}
+
+.bar::before {
+  content: ' ';
+  display: inline-block;
+  color: bar;
+  background-color: pink;
+  margin-right: 5px;
+  width: 200px;
+  height: 20px;
+}
