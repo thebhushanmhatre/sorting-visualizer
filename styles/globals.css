@@ -36,7 +36,7 @@ a {
 .bar {
   display: inline-block;
   color: bar;
-  background-color: pink;
+  background-color: skyblue;
   margin-right: 5px;
   margin-bottom: 5px;
   height: 20px;
@@ -45,11 +45,16 @@ a {
 }
 
 .bar-compare {
-  background-color: skyblue;
+  background-color: pink;
 }
 
 .bar-sorted {
   background-color: greenyellow;
+}
+
+.bar-danger {
+  background-color: red;
+  color: #fff;
 }
 
 p {
@@ -85,4 +90,8 @@ p {
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.result {
+  margin-left: 10px;
 }

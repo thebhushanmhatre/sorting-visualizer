@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 function Bar(props) {
   
-  const [width, setWidth] = React.useState(0)
+  const [width, setWidth] = useState(0)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setWidth(window.innerWidth)
   })
 
   let extra = props.obj.compareItems.includes(props.pos) ? " bar-compare" : ""
   extra += props.obj.sortedIndex >= props.pos ? " bar-sorted" : ""
+  extra += props.obj.incorrectOrder.includes(props.pos) ? " bar-danger" : ""
   let bar_width = { 
     "width": String(75 + props.num * width * 0.0035) + "px"
   }
+
   return (
     <p>
       <span className={"bar" + extra} style={bar_width}>

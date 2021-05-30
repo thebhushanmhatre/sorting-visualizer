@@ -1,10 +1,9 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Bars from '../components/Bars'
 
 function generateArray(num) {
   if (validate_n_set(num)){
-    console.log('Inside Generate Array')
     let arr = []
     for (let i = 0; i < num; i++) {
       arr.push(Math.round(Math.random() * 200 + 5))
@@ -26,25 +25,32 @@ function getsortArray(items){
   return sorted_items
 }
 
-function isSorted(arr){
-  let sorted_items = [...arr].sort((a, b) => { return a - b })
-  return (arr === sorted_items ? true : false)
+function isSorted(items){
+  let sortedItems = [...items].sort((a, b) => { return a - b })
+  return (JSON.stringify(items) == JSON.stringify(sortedItems))
 }
 
 export default function Home() {
 
-  var [num, setNum] = useState(20)
-  var [items, setItems] = useState([...Array(20)].map(() => Math.floor(Math.random() * 200 + 5)))
-  var [compareItems, setCompareItems] = useState([-1, -1])
-  var [sortedIndex, setSortedIndex] = useState([-1])
-
-  // FAILURE:
-  // Cannot Change State form Loops or Conditions
+  let [num, setNum] = useState(20)
+  let [items, setItems] = useState([...Array(20)].map(() => Math.floor(Math.random() * 200 + 5)))
+  let [compareItems, setCompareItems] = useState([-1, -1])
+  let [sortedIndex, setSortedIndex] = useState([-1])
+  let [unequalItems, setUnequalItems] = useState([-1, -1])
+  let [summary, setSummary] = useState('')
+  var [steps, setSteps] = useState(0)
 
   let resetArray = () => {
     setItems(generateArray(num))
     setCompareItems([-1, -1])
     setSortedIndex(-1)
+    setSummary('')
+    setUnequalItems([-1, -1])
+    var id = window.setTimeout(function () { }, 0);
+    while (id--) {
+      window.clearTimeout(id);
+    }
+    document.getElementById("startSort").disabled = false;
   }
   
   let finishSorting = () => {
@@ -52,70 +58,98 @@ export default function Home() {
     setItems(sorted_items)
     setCompareItems([0, 0])
     setSortedIndex(sorted_items.length)
+    setUnequalItems([-1, -1])
+    setSummary('Finished Sorting, All the numbers are in Ascending Order')
+    
+    var id = window.setTimeout(function () { }, 0);
+    while (id--) {
+      window.clearTimeout(id);
+    }
+
   }
 
   let startSorting = () => {
-    while (!isSorted(items)) {
-      let [i, j] = [...compareItems]
-      let newItems = [...items]
-      
-      if (sortedIndex != items.length){
-        if (i < 0){
-          i = 0
-          setCompareItems([...[i, j]])
+    document.getElementById("startSort").disabled = true;
+    let [i, j] = [...compareItems]
+    let incorrectOrder = [-1, -1]
+    let newItems = [...items]
+    let newIndex = sortedIndex
+    let summaryText = ''
+    let newStep = steps
+
+    if (newIndex < items.length-1) {
+      if (i < 0) {
+        i = 0
+        j = 1
+        summaryText = `Comparing number ${newItems[i]} with ${newItems[j]}`
+        if (newItems[i] > newItems[j]) {
+          summaryText += `, Incorrect Order: ${newItems[i]} > ${newItems[j]}`
+          incorrectOrder = [i, j]
         }
-        if (j < 0 || j < i){
-          j = i + 1
-          setCompareItems([...[i, j]])
-        }
-        if (i >= 0 && i < items.length-2){
-          if (j < items.length-1){
-            j+=1
-            
-            setCompareItems([...[i, j]])
-            
-            // setTimeout(function () {
-              if (newItems[i] > newItems[j]) {
-                let temp = newItems[j]
-                newItems[j] = newItems[i]
-                newItems[i] = temp
-
-                setCompareItems([...[i, j]])
-                setItems(newItems)
-              }
-            // }, 500)
-            
-          } else if (j === items.length){
-            j = i+2
-            i+=1
-
-            // setTimeout(function () {
-              if (newItems[i] > newItems[j]) {
-                let temp = newItems[j]
-                newItems[j] = newItems[i]
-                newItems[i] = temp
-
-                setItems(newItems)
-                setCompareItems([...[i, j]])
-                setSortedIndex(i)
-              }
-            // }, 500)
+      } else if (i >= 0 && i < items.length - 2) {
+        if (j < items.length - 1) {
+          
+          if (newItems[i] > newItems[j]) {
+            let temp = newItems[j]
+            newItems[j] = newItems[i]
+            newItems[i] = temp
+            summaryText = `Interchanged larger number ${newItems[i]} with smaller number ${newItems[j]}`
+          } else {
+            j += 1
+            summaryText = `Comparing number ${newItems[i]} with ${newItems[j]}`
+            if (newItems[i] > newItems[j]) {
+              summaryText += `, Incorrect Order: ${newItems[i]} > ${newItems[j]}`
+              incorrectOrder = [i, j]
+            }
+          }
+        } else if (j == items.length - 1) {
+          if (newItems[i] > newItems[j]) {
+            let temp = newItems[j]
+            newItems[j] = newItems[i]
+            newItems[i] = temp
+            summaryText = `Interchanged larger number ${newItems[i]} with smaller number ${newItems[j]}`
+          } else {
+            j = i + 2
+            newIndex = i
+            i += 1
+            summaryText = `Comparing number ${newItems[i]} with ${newItems[j]}`
+            if (newItems[i] > newItems[j]) {
+              summaryText += `, Incorrect Order: ${newItems[i]} > ${newItems[j]}`
+              incorrectOrder = [i, j]
+            }
           }
         }
+      } else if (i == items.length-2) {
+        if (newItems[i] > newItems[j]) {
+          let temp = newItems[j]
+          newItems[j] = newItems[i]
+          newItems[i] = temp
+          summaryText = `Interchanged larger number ${newItems[i]} with smaller number ${newItems[j]}`
+        } else {
+          j = items.length
+          newIndex = items.length
+          i = items.length
+          summaryText +=  'Finished Sorting, All the numbers are in Ascending Order'
+        }
       }
-
-      console.log(`i=${i}, j=${j} setCompareItems=${[...[i,j]]} compareItems=${compareItems}  sortedIndex=${sortedIndex}`)
-
-      setItems(newItems)
-      setCompareItems([...[i, j]])
-
-      console.log(`i=${i}, j=${j} setCompareItems=${[...[i,j]]} compareItems=${compareItems}  sortedIndex=${sortedIndex}`)
-      console.log('done')
-
-      // setTimeout(() => { startSorting() }, 3000);
-
+      newStep ++
+    } else {
+      summaryText = 'Finished Sorting, All the numbers are in Ascending Order'
     }
+    
+    setItems(newItems)
+    setCompareItems([...[i, j]])
+    setSortedIndex(newIndex)
+    setSummary(summaryText)
+    setUnequalItems(incorrectOrder)
+    setSteps(newStep)
   }
+
+  useEffect(() => {
+    steps > 0 ? setTimeout(() => {
+      startSorting()
+    }, 500) : undefined
+  }, [steps])
 
   return (
     <div>
@@ -137,13 +171,18 @@ export default function Home() {
           </div>
 
           <button type="submit" onClick={() => resetArray()}> Regenerate ({num})</button>
-          <button type="submit" onClick={() => startSorting()} disabled>Start Sorting </button>
-          <button type="submit" onClick={() => finishSorting()}>Finish </button>
+          <button id="startSort" type="submit" onClick={() => startSorting()} > Start Sorting </button>
+          <button type="submit" onClick={() => finishSorting()}> Finish </button>
         </div>
       </div>
 
       <div className='chart'>
-        <Bars items={items} obj={{ 'compareItems': compareItems, 'sortedIndex': sortedIndex}} />
+        <Bars items={items} obj={{ 'compareItems': compareItems, 'sortedIndex': sortedIndex,
+         'incorrectOrder': unequalItems}} />
+      </div>
+
+      <div className="result">
+        <p>{summary}</p>
       </div>
 
     </div>
